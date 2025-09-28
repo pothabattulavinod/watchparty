@@ -12,7 +12,7 @@
     #chat-input { width:70%; padding:5px; }
     #video { max-width: 90%; margin-top:10px; }
     #name-modal { margin-top:50px; }
-    input, button { padding:5px; font-size:16px; }
+    input, button { padding:5px; font-size:16px; margin:5px; }
   </style>
 </head>
 <body>
@@ -21,9 +21,14 @@
   <!-- Name & M3U8 prompt modal -->
   <div id="name-modal">
     <h2>Enter your name:</h2>
-    <input id="name-input" placeholder="Your name"><br><br>
-    <h2>Enter M3U8 link:</h2>
-    <input id="m3u8-input" placeholder="https://example.com/stream.m3u8"><br><br>
+    <input id="name-input" placeholder="Your name"><br>
+
+    <!-- Host-only M3U8 input -->
+    <div id="m3u8-container">
+      <h2>Enter M3U8 link (Host only):</h2>
+      <input id="m3u8-input" placeholder="https://example.com/stream.m3u8">
+    </div>
+
     <button id="name-btn">Join</button>
   </div>
 
