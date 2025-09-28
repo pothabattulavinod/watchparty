@@ -9,14 +9,24 @@
 <body>
   <h1>🎬 WatchParty</h1>
 
-  <!-- Video Player -->
-  <video id="video" width="600" controls>
-    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-  </video>
+  <!-- Name prompt modal -->
+  <div id="name-modal">
+    <h2>Enter your name:</h2>
+    <input id="name-input" placeholder="Your name">
+    <button id="name-btn">Join</button>
+  </div>
 
-  <!-- Chat -->
-  <div id="chat-box"></div>
-  <input id="chat-input" placeholder="Type a message...">
-  <button id="send-btn">Send</button>
+  <!-- Main content hidden initially -->
+  <div id="main-content" style="display:none">
+    <!-- Video Player -->
+    <video id="video" width="600" controls>
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+    </video>
+
+    <!-- Chat -->
+    <div id="chat-box"></div>
+    <input id="chat-input" placeholder="Type a message...">
+    <button id="send-btn">Send</button>
+  </div>
 </body>
 </html>
