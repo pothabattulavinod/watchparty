@@ -8,6 +8,7 @@ const db = getDatabase(app);
 
 const nameModal = document.getElementById("name-modal");
 const nameInput = document.getElementById("name-input");
+const m3u8Container = document.getElementById("m3u8-container");
 const m3u8Input = document.getElementById("m3u8-input");
 const nameBtn = document.getElementById("name-btn");
 const mainContent = document.getElementById("main-content");
@@ -18,6 +19,7 @@ const sendBtn = document.getElementById("send-btn");
 
 let username = "Guest";
 let isHost = false;
+
 const roomId = "room1";
 const roomRef = ref(db, `rooms/${roomId}`);
 const videoRef = ref(db, `rooms/${roomId}/video`);
@@ -34,17 +36,21 @@ nameBtn.addEventListener("click", async () => {
   // Check if host exists
   const snapshot = await get(child(roomRef, "host"));
   if (!snapshot.exists()) {
+    // Current user becomes host
     isHost = true;
     set(ref(db, `rooms/${roomId}/host`), username);
     if (!link) return alert("Host must enter M3U8 link!");
-    set(linkRef, link); // Save link in Firebase
+    set(linkRef, link);
+  } else {
+    // Guest: hide M3U8 input
+    m3u8Container.style.display = "none";
   }
 
-  // Hide modal
+  // Hide modal & show main content
   nameModal.style.display = "none";
   mainContent.style.display = "block";
 
-  // Load the M3U8 link from Firebase
+  // Load video from Firebase link
   onValue(linkRef, snap => {
     const m3u8Link = snap.val();
     if (!m3u8Link) return;
@@ -61,6 +67,8 @@ function loadM3U8(link) {
     hls.on(Hls.Events.ERROR, (event, data) => console.error("HLS.js error:", data));
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = link;
+  } else {
+    alert("Your browser does not support HLS.");
   }
 }
 
