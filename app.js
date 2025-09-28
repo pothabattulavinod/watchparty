@@ -1,13 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, onChildAdded } 
+import { getDatabase, ref, set, push, onValue, onChildAdded, get, child } 
   from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 import { firebaseConfig } from "./firebase-config.js";
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Elements
 const nameModal = document.getElementById("name-modal");
 const nameInput = document.getElementById("name-input");
 const m3u8Input = document.getElementById("m3u8-input");
@@ -18,24 +16,40 @@ const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 
-// User & Room
 let username = "Guest";
+let isHost = false;
 const roomId = "room1";
+const roomRef = ref(db, `rooms/${roomId}`);
 const videoRef = ref(db, `rooms/${roomId}/video`);
 const chatRef = ref(db, `rooms/${roomId}/chat`);
+const linkRef = ref(db, `rooms/${roomId}/link`);
 
 // === Handle Name & M3U8 Input ===
-nameBtn.addEventListener("click", () => {
+nameBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
   const link = m3u8Input.value.trim();
-  if (!name || !link) return alert("Enter name and M3U8 link!");
+  if (!name) return alert("Enter your name!");
   username = name;
 
-  // Load M3U8
-  loadM3U8(link);
+  // Check if host exists
+  const snapshot = await get(child(roomRef, "host"));
+  if (!snapshot.exists()) {
+    isHost = true;
+    set(ref(db, `rooms/${roomId}/host`), username);
+    if (!link) return alert("Host must enter M3U8 link!");
+    set(linkRef, link); // Save link in Firebase
+  }
 
+  // Hide modal
   nameModal.style.display = "none";
   mainContent.style.display = "block";
+
+  // Load the M3U8 link from Firebase
+  onValue(linkRef, snap => {
+    const m3u8Link = snap.val();
+    if (!m3u8Link) return;
+    loadM3U8(m3u8Link);
+  });
 });
 
 // === Load M3U8 function ===
@@ -47,8 +61,6 @@ function loadM3U8(link) {
     hls.on(Hls.Events.ERROR, (event, data) => console.error("HLS.js error:", data));
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = link;
-  } else {
-    alert("Your browser does not support HLS.");
   }
 }
 
