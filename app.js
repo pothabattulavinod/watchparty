@@ -35,29 +35,59 @@ nameBtn.addEventListener("click", () => {
 });
 
 // === VIDEO SYNC ===
+// Flag to avoid infinite loop when syncing video
+let isSyncing = false;
+
 // Update Firebase when local user plays/pauses/seeks
-video.addEventListener("play", () => set(videoRef, { isPlaying: true, currentTime: video.currentTime }));
-video.addEventListener("pause", () => set(videoRef, { isPlaying: false, currentTime: video.currentTime }));
-video.addEventListener("seeked", () => set(videoRef, { isPlaying: !video.paused, currentTime: video.currentTime }));
+video.addEventListener("play", () => {
+  if (!isSyncing) {
+    set(videoRef, { isPlaying: true, currentTime: video.currentTime });
+  }
+});
+video.addEventListener("pause", () => {
+  if (!isSyncing) {
+    set(videoRef, { isPlaying: false, currentTime: video.currentTime });
+  }
+});
+video.addEventListener("seeked", () => {
+  if (!isSyncing) {
+    set(videoRef, { isPlaying: !video.paused, currentTime: video.currentTime });
+  }
+});
 
 // Listen for video updates from Firebase
 onValue(videoRef, snapshot => {
   const data = snapshot.val();
   if (!data) return;
 
+  isSyncing = true; // prevent feedback loop
+
   // Sync playback
-  if (data.isPlaying && video.paused) {
-    video.currentTime = data.currentTime;
-    video.play();
-  } else if (!data.isPlaying && !video.paused) {
-    video.currentTime = data.currentTime;
-    video.pause();
+  if (data.isPlaying) {
+    if (Math.abs(video.currentTime - data.currentTime) > 0.5) {
+      video.currentTime = data.currentTime;
+    }
+    if (video.paused) video.play();
+  } else {
+    if (Math.abs(video.currentTime - data.currentTime) > 0.5) {
+      video.currentTime = data.currentTime;
+    }
+    if (!video.paused) video.pause();
   }
+
+  isSyncing = false;
 });
 
 // === CHAT ===
 // Send chat message
 sendBtn.addEventListener("click", () => {
+  sendMessage();
+});
+chatInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage();
+});
+
+function sendMessage() {
   const msg = chatInput.value.trim();
   if (!msg) return;
 
@@ -69,11 +99,13 @@ sendBtn.addEventListener("click", () => {
   });
 
   chatInput.value = "";
-});
+}
 
 // Listen for new chat messages
 onChildAdded(chatRef, snapshot => {
   const msg = snapshot.val();
+  if (!msg) return;
+
   const div = document.createElement("div");
   div.textContent = `${msg.user}: ${msg.text}`;
   chatBox.appendChild(div);
