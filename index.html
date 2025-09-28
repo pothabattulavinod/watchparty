@@ -12,16 +12,22 @@
     #chat-input { width:70%; padding:5px; }
     #video { max-width: 90%; margin-top:10px; }
     #name-modal { margin-top:50px; }
-    input, button { padding:5px; font-size:16px; margin:5px; }
+    input, select, button { padding:5px; font-size:16px; margin:5px; }
   </style>
 </head>
 <body>
   <h1>🎬 WatchParty</h1>
 
-  <!-- Name & M3U8 prompt modal -->
+  <!-- Name & Role Selection modal -->
   <div id="name-modal">
     <h2>Enter your name:</h2>
     <input id="name-input" placeholder="Your name"><br>
+
+    <h2>Select Role:</h2>
+    <select id="role-select">
+      <option value="host">Host</option>
+      <option value="guest" selected>Guest</option>
+    </select><br>
 
     <!-- Host-only M3U8 input -->
     <div id="m3u8-container">
