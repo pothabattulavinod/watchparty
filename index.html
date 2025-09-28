@@ -6,25 +6,35 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script type="module" src="app.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; margin:20px; }
+    #chat-box { border:1px solid #ccc; height:200px; overflow-y:auto; margin:10px auto; padding:5px; width:80%; }
+    #chat-input { width:70%; padding:5px; }
+    #video { max-width: 90%; margin-top:10px; }
+    #name-modal { margin-top:50px; }
+    input, button { padding:5px; font-size:16px; }
+  </style>
 </head>
 <body>
   <h1>🎬 WatchParty</h1>
 
-  <!-- Name prompt modal -->
+  <!-- Name & M3U8 prompt modal -->
   <div id="name-modal">
     <h2>Enter your name:</h2>
-    <input id="name-input" placeholder="Your name">
+    <input id="name-input" placeholder="Your name"><br><br>
+    <h2>Enter M3U8 link:</h2>
+    <input id="m3u8-input" placeholder="https://example.com/stream.m3u8"><br><br>
     <button id="name-btn">Join</button>
   </div>
 
   <!-- Main content hidden initially -->
   <div id="main-content" style="display:none">
     <!-- Video Player -->
-    <video id="video" width="600" controls></video>
+    <video id="video" controls></video>
 
     <!-- Chat -->
-    <div id="chat-box" style="border:1px solid #ccc; height:200px; overflow-y:auto; margin-top:10px; padding:5px;"></div>
-    <input id="chat-input" placeholder="Type a message..." style="width:70%;">
+    <div id="chat-box"></div>
+    <input id="chat-input" placeholder="Type a message...">
     <button id="send-btn">Send</button>
   </div>
 </body>
