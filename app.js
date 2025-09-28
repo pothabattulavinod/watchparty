@@ -7,12 +7,10 @@ import { firebaseConfig } from "./firebase-config.js";
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// User name
-let username = "Guest";
-
 // Elements
 const nameModal = document.getElementById("name-modal");
 const nameInput = document.getElementById("name-input");
+const m3u8Input = document.getElementById("m3u8-input");
 const nameBtn = document.getElementById("name-btn");
 const mainContent = document.getElementById("main-content");
 const video = document.getElementById("video");
@@ -20,29 +18,39 @@ const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 
-// Room setup
+// User & Room
+let username = "Guest";
 const roomId = "room1";
 const videoRef = ref(db, `rooms/${roomId}/video`);
 const chatRef = ref(db, `rooms/${roomId}/chat`);
 
-// === M3U8 Setup ===
-const m3u8Link = "https://pothabattulavinod.github.io/pay/aay.m3u8"; // Replace with your .m3u8 link
-if (Hls.isSupported()) {
-  const hls = new Hls();
-  hls.loadSource(m3u8Link);
-  hls.attachMedia(video);
-} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-  video.src = m3u8Link;
-}
-
-// === Handle Name Input ===
+// === Handle Name & M3U8 Input ===
 nameBtn.addEventListener("click", () => {
   const name = nameInput.value.trim();
-  if (!name) return alert("Please enter a name!");
+  const link = m3u8Input.value.trim();
+  if (!name || !link) return alert("Enter name and M3U8 link!");
   username = name;
+
+  // Load M3U8
+  loadM3U8(link);
+
   nameModal.style.display = "none";
   mainContent.style.display = "block";
 });
+
+// === Load M3U8 function ===
+function loadM3U8(link) {
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(link);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.ERROR, (event, data) => console.error("HLS.js error:", data));
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = link;
+  } else {
+    alert("Your browser does not support HLS.");
+  }
+}
 
 // === VIDEO SYNC ===
 let isSyncing = false;
@@ -62,14 +70,9 @@ onValue(videoRef, snapshot => {
   if (!data) return;
 
   isSyncing = true;
-
-  if (Math.abs(video.currentTime - data.currentTime) > 0.5) {
-    video.currentTime = data.currentTime;
-  }
-
+  if (Math.abs(video.currentTime - data.currentTime) > 0.5) video.currentTime = data.currentTime;
   if (data.isPlaying && video.paused) video.play();
   if (!data.isPlaying && !video.paused) video.pause();
-
   isSyncing = false;
 });
 
