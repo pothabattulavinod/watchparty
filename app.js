@@ -7,14 +7,34 @@ import { firebaseConfig } from "./firebase-config.js";
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Room setup (for demo purposes, a single room)
+// User name
+let username = "Guest";
+
+// Elements
+const nameModal = document.getElementById("name-modal");
+const nameInput = document.getElementById("name-input");
+const nameBtn = document.getElementById("name-btn");
+const mainContent = document.getElementById("main-content");
+const video = document.getElementById("video");
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const sendBtn = document.getElementById("send-btn");
+
+// Room setup
 const roomId = "room1";
 const videoRef = ref(db, `rooms/${roomId}/video`);
 const chatRef = ref(db, `rooms/${roomId}/chat`);
 
-// VIDEO SYNC
-const video = document.getElementById("video");
+// === Handle Name Input ===
+nameBtn.addEventListener("click", () => {
+  const name = nameInput.value.trim();
+  if (!name) return alert("Please enter a name!");
+  username = name;
+  nameModal.style.display = "none";
+  mainContent.style.display = "block";
+});
 
+// === VIDEO SYNC ===
 // Update Firebase when local user plays/pauses/seeks
 video.addEventListener("play", () => set(videoRef, { isPlaying: true, currentTime: video.currentTime }));
 video.addEventListener("pause", () => set(videoRef, { isPlaying: false, currentTime: video.currentTime }));
@@ -35,11 +55,7 @@ onValue(videoRef, snapshot => {
   }
 });
 
-// CHAT
-const chatBox = document.getElementById("chat-box");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send-btn");
-
+// === CHAT ===
 // Send chat message
 sendBtn.addEventListener("click", () => {
   const msg = chatInput.value.trim();
@@ -47,7 +63,7 @@ sendBtn.addEventListener("click", () => {
 
   const msgRef = push(chatRef);
   set(msgRef, {
-    user: "Guest",
+    user: username,
     text: msg,
     timestamp: Date.now()
   });
